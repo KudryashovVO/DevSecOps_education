@@ -1,0 +1,11 @@
+---
+nginx_configs:
+- name: mywebsite.conf
+  value: |
+    server {
+      listen 80;
+      location / {
+        access_log off;
+        root /var/www/mywebsite;
+      }
+    }
