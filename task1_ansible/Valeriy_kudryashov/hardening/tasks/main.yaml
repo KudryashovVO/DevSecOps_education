@@ -1,0 +1,86 @@
+---
+- name: Check for Python
+  raw: test -e /usr/bin/python
+  changed_when: false
+  failed_when: false
+  register: check_python
+
+- name: Install Python
+  raw: apt -y update && apt install -y python-minimal
+  when: check_python.rc != 0
+
+- name: Check for Python
+  raw: test -e /usr/bin/python3
+  changed_when: false
+  failed_when: false
+  register: check_python3
+
+- name: Install Python
+  raw: apt -y update && apt install -y python-minimal
+  when: check_python3.rc != 0
+
+- name: set timezone to Asia/Tomsk
+  timezone:
+    name: Asia/Tomsk
+
+- name: Install the NTP daemon to synchronize the clocks to ms.
+  apt: name=ntp
+
+- name: Make sure ntp is started, and is enabled on restart.
+  service: name=ntp state=started enabled=yes
+
+- name: Install fail2ban
+  apt: name=fail2ban
+
+- name: Install fail2ban started, and is enabled on restart.
+  service: name=fail2ban state=started enabled=yes
+
+- name: Configuring openssh by C2S/CIS
+  copy:
+    dest: /etc/ssh/sshd_config
+    src: sshd_config
+
+#- name: Stop service autofs, if it started
+#  ansible.builtin.service:
+#    name: autofs
+#    state: stopped
+#    enabled: no
+
+- name: Setting GRUB
+  blockinfile:
+    path: /etc/default/grub
+    state: present
+    block: |
+      #Disable ipv6
+      GRUB_CMDLINE_LINUX="ipv6.disable=1"`
+      #switch on auditd before start system:
+      GRUB_CMDLINE_LINUX="audit=1"`
+      GRUB_CMDLINE_LINUX="audit_backlog_limit=8192"`
+
+- name: Install libcrack2
+  raw: apt -y update && apt install -y libcrack2
+
+
+- name: Modify the System Message of the Day Banner
+  copy:
+    dest: /etc/motd
+    src: motd
+
+- name: Set Account Expiration Following Inactivity
+  copy:
+    dest: /etc/default/useradd
+    src: useradd
+
+- name: Change a login.defs
+  ansible.builtin.lineinfile:
+    path: /etc/login.defs
+    insertbefore: BOF
+    regexp: "{{ item.regexp }}"
+    line: "{{ item.line }}"
+  with_items:
+    - regexp: '^ENCRYPT_METHOD '
+      line: 'ENCRYPT_METHOD SHA512'
+    - regexp: '^#FAIL_DELAY '
+      line: 'FAIL_DELAY 3'
+    - regexp: '^FAILLOG_ENAB		yes '
+      line: 'FAILLOG_ENAB		yes'

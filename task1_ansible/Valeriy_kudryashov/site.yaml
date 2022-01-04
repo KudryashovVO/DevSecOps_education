@@ -1,0 +1,9 @@
+- name: ensure docker
+  become: true
+  hosts: all
+  gather_facts: no
+  roles:
+#    - { role: docker , tags [docker] }
+#    - { role: hardenig, tags [hardening] }
+#   - docker
+   - hardening

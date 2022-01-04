@@ -1,0 +1,805 @@
+   docker-3: Running ansible-playbook...
+
+PLAY [ensure docker] ***********************************************************
+
+TASK [hardening : Check for Python] ********************************************
+ok: [docker-2]
+ok: [docker-3]
+ok: [docker-1]
+
+TASK [hardening : Install Python] **********************************************
+skipping: [docker-3]
+skipping: [docker-1]
+skipping: [docker-2]
+
+TASK [hardening : Check for Python] ********************************************
+ok: [docker-3]
+ok: [docker-2]
+ok: [docker-1]
+
+TASK [hardening : Install Python] **********************************************
+skipping: [docker-3]
+skipping: [docker-2]
+skipping: [docker-1]
+
+TASK [hardening : set timezone to Asia/Tomsk] **********************************
+--- before
++++ after
+@@ -1,3 +1,3 @@
+ {
+-    "name": "Etc/UTC"
++    "name": "Asia/Tomsk"
+ }
+
+changed: [docker-3]
+[WARNING]: Platform linux on host docker-3 is using the discovered Python
+interpreter at /usr/bin/python, but future installation of another Python
+interpreter could change this. See https://docs.ansible.com/ansible/2.9/referen
+ce_appendices/interpreter_discovery.html for more information.
+--- before
++++ after
+@@ -1,3 +1,3 @@
+ {
+-    "name": "Etc/UTC"
++    "name": "Asia/Tomsk"
+ }
+
+changed: [docker-1]
+[WARNING]: Platform linux on host docker-1 is using the discovered Python
+interpreter at /usr/bin/python, but future installation of another Python
+interpreter could change this. See https://docs.ansible.com/ansible/2.9/referen
+ce_appendices/interpreter_discovery.html for more information.
+--- before
++++ after
+@@ -1,3 +1,3 @@
+ {
+-    "name": "Etc/UTC"
++    "name": "Asia/Tomsk"
+ }
+
+changed: [docker-2]
+[WARNING]: Platform linux on host docker-2 is using the discovered Python
+interpreter at /usr/bin/python, but future installation of another Python
+interpreter could change this. See https://docs.ansible.com/ansible/2.9/referen
+ce_appendices/interpreter_discovery.html for more information.
+
+TASK [hardening : Install the NTP daemon to synchronize the clocks to ms.] *****
+The following additional packages will be installed:
+  libevent-core-2.1-6 libevent-pthreads-2.1-6 libopts25 sntp
+Suggested packages:
+  ntp-doc
+The following packages will be REMOVED:
+  chrony
+The following NEW packages will be installed:
+  libevent-core-2.1-6 libevent-pthreads-2.1-6 libopts25 ntp sntp
+0 upgraded, 5 newly installed, 1 to remove and 13 not upgraded.
+changed: [docker-2]
+[WARNING]: Updating cache and auto-installing missing dependency: python-apt
+The following additional packages will be installed:
+  libevent-core-2.1-6 libevent-pthreads-2.1-6 libopts25 sntp
+Suggested packages:
+  ntp-doc
+The following packages will be REMOVED:
+  chrony
+The following NEW packages will be installed:
+  libevent-core-2.1-6 libevent-pthreads-2.1-6 libopts25 ntp sntp
+0 upgraded, 5 newly installed, 1 to remove and 13 not upgraded.
+changed: [docker-3]
+The following additional packages will be installed:
+  libevent-core-2.1-6 libevent-pthreads-2.1-6 libopts25 sntp
+Suggested packages:
+  ntp-doc
+The following packages will be REMOVED:
+  chrony
+The following NEW packages will be installed:
+  libevent-core-2.1-6 libevent-pthreads-2.1-6 libopts25 ntp sntp
+0 upgraded, 5 newly installed, 1 to remove and 13 not upgraded.
+changed: [docker-1]
+
+TASK [hardening : Make sure ntp is started, and is enabled on restart.] ********
+ok: [docker-1]
+ok: [docker-2]
+ok: [docker-3]
+
+TASK [hardening : Install fail2ban] ********************************************
+The following additional packages will be installed:
+  python3-pyinotify python3-systemd whois
+Suggested packages:
+  mailx monit sqlite3 python-pyinotify-doc
+The following NEW packages will be installed:
+  fail2ban python3-pyinotify python3-systemd whois
+0 upgraded, 4 newly installed, 0 to remove and 13 not upgraded.
+changed: [docker-3]
+The following additional packages will be installed:
+  python3-pyinotify python3-systemd whois
+Suggested packages:
+  mailx monit sqlite3 python-pyinotify-doc
+The following NEW packages will be installed:
+  fail2ban python3-pyinotify python3-systemd whois
+0 upgraded, 4 newly installed, 0 to remove and 13 not upgraded.
+changed: [docker-2]
+The following additional packages will be installed:
+  python3-pyinotify python3-systemd whois
+Suggested packages:
+  mailx monit sqlite3 python-pyinotify-doc
+The following NEW packages will be installed:
+  fail2ban python3-pyinotify python3-systemd whois
+0 upgraded, 4 newly installed, 0 to remove and 13 not upgraded.
+changed: [docker-1]
+
+TASK [hardening : Install fail2ban started, and is enabled on restart.] ********
+ok: [docker-3]
+ok: [docker-1]
+ok: [docker-2]
+
+TASK [hardening : Configuring openssh by C2S/CIS] ******************************
+--- before: /etc/ssh/sshd_config
++++ after: /home/valeriy/DevSecOps/OS/devops/ansible/lab5/roles/hardening/files/sshd_config
+@@ -15,6 +15,10 @@
+ #ListenAddress 0.0.0.0
+ #ListenAddress ::
+ 
++#C2S/CIS: CCE-27320-1 (High)
++#Set correct protocol version
++Protocol 2
++
+ #HostKey /etc/ssh/ssh_host_rsa_key
+ #HostKey /etc/ssh/ssh_host_ecdsa_key
+ #HostKey /etc/ssh/ssh_host_ed25519_key
+@@ -26,12 +30,28 @@
+ #SyslogFacility AUTH
+ #LogLevel INFO
+ 
++#C2S/CIS: CCE-80645-5 (Medium)
++#Set specific log level
++#C2S/CIS: CCE-27295-5 (High)
++#Set algorithms which are FIPS-approved
++LogLevel INFO
++
+ # Authentication:
+ 
+ #LoginGraceTime 2m
+ #PermitRootLogin prohibit-password
++
++#C2S/CIS: CCE-27445-6 (Medium)
++#Disable root login via SSH
++PermitRootLogin no
++
+ #StrictModes yes
+ #MaxAuthTries 6
++
++#2S/CIS: No-CCE (Medium)
++#Set authentication attempt limit
++MaxAuthTries 4
++
+ #MaxSessions 10
+ 
+ #PubkeyAuthentication yes
+@@ -46,15 +66,28 @@
+ 
+ # For this to work you will also need host keys in /etc/ssh/ssh_known_hosts
+ #HostbasedAuthentication no
++
++#C2S/CIS: CCE-27413-4 (Medium)
++#Disable host-based authentication
++HostbasedAuthentication no
++
+ # Change to yes if you don't trust ~/.ssh/known_hosts for
+ # HostbasedAuthentication
+ #IgnoreUserKnownHosts no
+ # Don't read the user's ~/.rhosts and ~/.shosts files
+ #IgnoreRhosts yes
+ 
++#C2S/CIS: CCE-27377-1 (Medium)
++#Support for .rhosts
++IgnoreRhosts yes
++
+ # To disable tunneled clear text passwords, change to no here!
+ PasswordAuthentication no
+ #PermitEmptyPasswords no
++
++#C2S/CIS: CCE-27471-2 (High)
++#Explicitly disallow SSH login from accounts with empty passwords
++PermitEmptyPasswords no
+ 
+ # Change to yes to enable challenge-response passwords (beware issues with
+ # some PAM modules and threads)
+@@ -85,8 +118,16 @@
+ 
+ #AllowAgentForwarding yes
+ #AllowTcpForwarding yes
++
++C2S/CIS:
++AllowTcpForwarding no
++
+ #GatewayPorts no
+-X11Forwarding yes
++#X11Forwarding yes
++
++#C2S/CIS: CCE- 80226-4 (High)
++X11Forwarding no
++
+ #X11DisplayOffset 10
+ #X11UseLocalhost yes
+ #PermitTTY yes
+@@ -94,13 +135,32 @@
+ #PrintLastLog yes
+ #TCPKeepAlive yes
+ #PermitUserEnvironment no
++
++C2S/CIS: CCE-27363-1 (Medium)
++Override environment options
++PermitUserEnvironment no
++
+ #Compression delayed
+ #ClientAliveInterval 0
++
++#C2S/CIS: CCE-27433-2 (Medium)
++#Set short time period
++ClientAliveInterval 300
++
+ #ClientAliveCountMax 3
++
++#C2S/CIS: CCE-27082-7 (Medium)
++#Sets the number of client alive messages
++ClientAliveCountMax 0
++
+ #UseDNS no
+ #PidFile /var/run/sshd.pid
+ #MaxStartups 10:30:100
+ #PermitTunnel no
++
++#C2S/CIS:
++PermitTunnel no
++
+ #ChrootDirectory none
+ #VersionAddendum none
+ 
+
+changed: [docker-2]
+--- before: /etc/ssh/sshd_config
++++ after: /home/valeriy/DevSecOps/OS/devops/ansible/lab5/roles/hardening/files/sshd_config
+@@ -15,6 +15,10 @@
+ #ListenAddress 0.0.0.0
+ #ListenAddress ::
+ 
++#C2S/CIS: CCE-27320-1 (High)
++#Set correct protocol version
++Protocol 2
++
+ #HostKey /etc/ssh/ssh_host_rsa_key
+ #HostKey /etc/ssh/ssh_host_ecdsa_key
+ #HostKey /etc/ssh/ssh_host_ed25519_key
+@@ -26,12 +30,28 @@
+ #SyslogFacility AUTH
+ #LogLevel INFO
+ 
++#C2S/CIS: CCE-80645-5 (Medium)
++#Set specific log level
++#C2S/CIS: CCE-27295-5 (High)
++#Set algorithms which are FIPS-approved
++LogLevel INFO
++
+ # Authentication:
+ 
+ #LoginGraceTime 2m
+ #PermitRootLogin prohibit-password
++
++#C2S/CIS: CCE-27445-6 (Medium)
++#Disable root login via SSH
++PermitRootLogin no
++
+ #StrictModes yes
+ #MaxAuthTries 6
++
++#2S/CIS: No-CCE (Medium)
++#Set authentication attempt limit
++MaxAuthTries 4
++
+ #MaxSessions 10
+ 
+ #PubkeyAuthentication yes
+@@ -46,15 +66,28 @@
+ 
+ # For this to work you will also need host keys in /etc/ssh/ssh_known_hosts
+ #HostbasedAuthentication no
++
++#C2S/CIS: CCE-27413-4 (Medium)
++#Disable host-based authentication
++HostbasedAuthentication no
++
+ # Change to yes if you don't trust ~/.ssh/known_hosts for
+ # HostbasedAuthentication
+ #IgnoreUserKnownHosts no
+ # Don't read the user's ~/.rhosts and ~/.shosts files
+ #IgnoreRhosts yes
+ 
++#C2S/CIS: CCE-27377-1 (Medium)
++#Support for .rhosts
++IgnoreRhosts yes
++
+ # To disable tunneled clear text passwords, change to no here!
+ PasswordAuthentication no
+ #PermitEmptyPasswords no
++
++#C2S/CIS: CCE-27471-2 (High)
++#Explicitly disallow SSH login from accounts with empty passwords
++PermitEmptyPasswords no
+ 
+ # Change to yes to enable challenge-response passwords (beware issues with
+ # some PAM modules and threads)
+@@ -85,8 +118,16 @@
+ 
+ #AllowAgentForwarding yes
+ #AllowTcpForwarding yes
++
++C2S/CIS:
++AllowTcpForwarding no
++
+ #GatewayPorts no
+-X11Forwarding yes
++#X11Forwarding yes
++
++#C2S/CIS: CCE- 80226-4 (High)
++X11Forwarding no
++
+ #X11DisplayOffset 10
+ #X11UseLocalhost yes
+ #PermitTTY yes
+@@ -94,13 +135,32 @@
+ #PrintLastLog yes
+ #TCPKeepAlive yes
+ #PermitUserEnvironment no
++
++C2S/CIS: CCE-27363-1 (Medium)
++Override environment options
++PermitUserEnvironment no
++
+ #Compression delayed
+ #ClientAliveInterval 0
++
++#C2S/CIS: CCE-27433-2 (Medium)
++#Set short time period
++ClientAliveInterval 300
++
+ #ClientAliveCountMax 3
++
++#C2S/CIS: CCE-27082-7 (Medium)
++#Sets the number of client alive messages
++ClientAliveCountMax 0
++
+ #UseDNS no
+ #PidFile /var/run/sshd.pid
+ #MaxStartups 10:30:100
+ #PermitTunnel no
++
++#C2S/CIS:
++PermitTunnel no
++
+ #ChrootDirectory none
+ #VersionAddendum none
+ 
+
+changed: [docker-3]
+--- before: /etc/ssh/sshd_config
++++ after: /home/valeriy/DevSecOps/OS/devops/ansible/lab5/roles/hardening/files/sshd_config
+@@ -15,6 +15,10 @@
+ #ListenAddress 0.0.0.0
+ #ListenAddress ::
+ 
++#C2S/CIS: CCE-27320-1 (High)
++#Set correct protocol version
++Protocol 2
++
+ #HostKey /etc/ssh/ssh_host_rsa_key
+ #HostKey /etc/ssh/ssh_host_ecdsa_key
+ #HostKey /etc/ssh/ssh_host_ed25519_key
+@@ -26,12 +30,28 @@
+ #SyslogFacility AUTH
+ #LogLevel INFO
+ 
++#C2S/CIS: CCE-80645-5 (Medium)
++#Set specific log level
++#C2S/CIS: CCE-27295-5 (High)
++#Set algorithms which are FIPS-approved
++LogLevel INFO
++
+ # Authentication:
+ 
+ #LoginGraceTime 2m
+ #PermitRootLogin prohibit-password
++
++#C2S/CIS: CCE-27445-6 (Medium)
++#Disable root login via SSH
++PermitRootLogin no
++
+ #StrictModes yes
+ #MaxAuthTries 6
++
++#2S/CIS: No-CCE (Medium)
++#Set authentication attempt limit
++MaxAuthTries 4
++
+ #MaxSessions 10
+ 
+ #PubkeyAuthentication yes
+@@ -46,15 +66,28 @@
+ 
+ # For this to work you will also need host keys in /etc/ssh/ssh_known_hosts
+ #HostbasedAuthentication no
++
++#C2S/CIS: CCE-27413-4 (Medium)
++#Disable host-based authentication
++HostbasedAuthentication no
++
+ # Change to yes if you don't trust ~/.ssh/known_hosts for
+ # HostbasedAuthentication
+ #IgnoreUserKnownHosts no
+ # Don't read the user's ~/.rhosts and ~/.shosts files
+ #IgnoreRhosts yes
+ 
++#C2S/CIS: CCE-27377-1 (Medium)
++#Support for .rhosts
++IgnoreRhosts yes
++
+ # To disable tunneled clear text passwords, change to no here!
+ PasswordAuthentication no
+ #PermitEmptyPasswords no
++
++#C2S/CIS: CCE-27471-2 (High)
++#Explicitly disallow SSH login from accounts with empty passwords
++PermitEmptyPasswords no
+ 
+ # Change to yes to enable challenge-response passwords (beware issues with
+ # some PAM modules and threads)
+@@ -85,8 +118,16 @@
+ 
+ #AllowAgentForwarding yes
+ #AllowTcpForwarding yes
++
++C2S/CIS:
++AllowTcpForwarding no
++
+ #GatewayPorts no
+-X11Forwarding yes
++#X11Forwarding yes
++
++#C2S/CIS: CCE- 80226-4 (High)
++X11Forwarding no
++
+ #X11DisplayOffset 10
+ #X11UseLocalhost yes
+ #PermitTTY yes
+@@ -94,13 +135,32 @@
+ #PrintLastLog yes
+ #TCPKeepAlive yes
+ #PermitUserEnvironment no
++
++C2S/CIS: CCE-27363-1 (Medium)
++Override environment options
++PermitUserEnvironment no
++
+ #Compression delayed
+ #ClientAliveInterval 0
++
++#C2S/CIS: CCE-27433-2 (Medium)
++#Set short time period
++ClientAliveInterval 300
++
+ #ClientAliveCountMax 3
++
++#C2S/CIS: CCE-27082-7 (Medium)
++#Sets the number of client alive messages
++ClientAliveCountMax 0
++
+ #UseDNS no
+ #PidFile /var/run/sshd.pid
+ #MaxStartups 10:30:100
+ #PermitTunnel no
++
++#C2S/CIS:
++PermitTunnel no
++
+ #ChrootDirectory none
+ #VersionAddendum none
+ 
+
+changed: [docker-1]
+
+TASK [hardening : Setting GRUB] ************************************************
+--- before: /etc/default/grub (content)
++++ after: /etc/default/grub (content)
+@@ -30,3 +30,10 @@
+ 
+ # Uncomment to get a beep at grub start
+ #GRUB_INIT_TUNE="480 440 1"
++# BEGIN ANSIBLE MANAGED BLOCK
++#Disable ipv6
++GRUB_CMDLINE_LINUX="ipv6.disable=1"`
++#switch on auditd before start system:
++GRUB_CMDLINE_LINUX="audit=1"`
++GRUB_CMDLINE_LINUX="audit_backlog_limit=8192"`
++# END ANSIBLE MANAGED BLOCK
+
+changed: [docker-3]
+--- before: /etc/default/grub (content)
++++ after: /etc/default/grub (content)
+@@ -30,3 +30,10 @@
+ 
+ # Uncomment to get a beep at grub start
+ #GRUB_INIT_TUNE="480 440 1"
++# BEGIN ANSIBLE MANAGED BLOCK
++#Disable ipv6
++GRUB_CMDLINE_LINUX="ipv6.disable=1"`
++#switch on auditd before start system:
++GRUB_CMDLINE_LINUX="audit=1"`
++GRUB_CMDLINE_LINUX="audit_backlog_limit=8192"`
++# END ANSIBLE MANAGED BLOCK
+
+changed: [docker-1]
+--- before: /etc/default/grub (content)
++++ after: /etc/default/grub (content)
+@@ -30,3 +30,10 @@
+ 
+ # Uncomment to get a beep at grub start
+ #GRUB_INIT_TUNE="480 440 1"
++# BEGIN ANSIBLE MANAGED BLOCK
++#Disable ipv6
++GRUB_CMDLINE_LINUX="ipv6.disable=1"`
++#switch on auditd before start system:
++GRUB_CMDLINE_LINUX="audit=1"`
++GRUB_CMDLINE_LINUX="audit_backlog_limit=8192"`
++# END ANSIBLE MANAGED BLOCK
+
+changed: [docker-2]
+
+TASK [hardening : Install libcrack2] *******************************************
+changed: [docker-1]
+changed: [docker-2]
+changed: [docker-3]
+
+TASK [hardening : Modify the System Message of the Day Banner] *****************
+--- before: /etc/motd
++++ after: /home/valeriy/DevSecOps/OS/devops/ansible/lab5/roles/hardening/files/motd
+@@ -1,7 +1,6 @@
+-
+-The programs included with the Debian GNU/Linux system are free software;
+-the exact distribution terms for each program are described in the
+-individual files in /usr/share/doc/*/copyright.
+-
+-Debian GNU/Linux comes with ABSOLUTELY NO WARRANTY, to the extent
+-permitted by applicable law.
++> This system is for the use of authorised users only. Individuals using this computer system without authority, or in
++excess of their authority, are subject to having all of their activities on this system monitored and recorded by system
++personnel. In the course of monitoring individuals improperly using this system, or in the course of system maintenance,
++the activities of authorised users may also be monitored. Anyone using this system expressly consents to such monitoring
++and is advised that if such monitoring reveals possible criminal activity, system personnel may provide the evidence of
++such monitoring to law enforcement officials.
+
+changed: [docker-3]
+--- before: /etc/motd
++++ after: /home/valeriy/DevSecOps/OS/devops/ansible/lab5/roles/hardening/files/motd
+@@ -1,7 +1,6 @@
+-
+-The programs included with the Debian GNU/Linux system are free software;
+-the exact distribution terms for each program are described in the
+-individual files in /usr/share/doc/*/copyright.
+-
+-Debian GNU/Linux comes with ABSOLUTELY NO WARRANTY, to the extent
+-permitted by applicable law.
++> This system is for the use of authorised users only. Individuals using this computer system without authority, or in
++excess of their authority, are subject to having all of their activities on this system monitored and recorded by system
++personnel. In the course of monitoring individuals improperly using this system, or in the course of system maintenance,
++the activities of authorised users may also be monitored. Anyone using this system expressly consents to such monitoring
++and is advised that if such monitoring reveals possible criminal activity, system personnel may provide the evidence of
++such monitoring to law enforcement officials.
+
+changed: [docker-1]
+--- before: /etc/motd
++++ after: /home/valeriy/DevSecOps/OS/devops/ansible/lab5/roles/hardening/files/motd
+@@ -1,7 +1,6 @@
+-
+-The programs included with the Debian GNU/Linux system are free software;
+-the exact distribution terms for each program are described in the
+-individual files in /usr/share/doc/*/copyright.
+-
+-Debian GNU/Linux comes with ABSOLUTELY NO WARRANTY, to the extent
+-permitted by applicable law.
++> This system is for the use of authorised users only. Individuals using this computer system without authority, or in
++excess of their authority, are subject to having all of their activities on this system monitored and recorded by system
++personnel. In the course of monitoring individuals improperly using this system, or in the course of system maintenance,
++the activities of authorised users may also be monitored. Anyone using this system expressly consents to such monitoring
++and is advised that if such monitoring reveals possible criminal activity, system personnel may provide the evidence of
++such monitoring to law enforcement officials.
+
+changed: [docker-2]
+
+TASK [hardening : Set Account Expiration Following Inactivity] *****************
+--- before: /etc/default/useradd
++++ after: /home/valeriy/DevSecOps/OS/devops/ansible/lab5/roles/hardening/files/useradd
+@@ -1,37 +1,3 @@
+-# Default values for useradd(8)
+-#
+-# The SHELL variable specifies the default login shell on your
+-# system.
+-# Similar to DHSELL in adduser. However, we use "sh" here because
+-# useradd is a low level utility and should be as general
+-# as possible
+ SHELL=/bin/sh
+-#
+-# The default group for users
+-# 100=users on Debian systems
+-# Same as USERS_GID in adduser
+-# This argument is used when the -n flag is specified.
+-# The default behavior (when -n and -g are not specified) is to create a
+-# primary user group with the same name as the user being added to the
+-# system.
+-# GROUP=100
+-#
+-# The default home directory. Same as DHOME for adduser
+-# HOME=/home
+-#
+-# The number of days after a password expires until the account 
+-# is permanently disabled
+-# INACTIVE=-1
+-#
+-# The default expire date
+-# EXPIRE=
+-#
+-# The SKEL variable specifies the directory containing "skeletal" user
+-# files; in other words, files such as a sample .profile that will be
+-# copied to the new user's home directory when it is created.
+-# SKEL=/etc/skel
+-#
+-# Defines whether the mail spool should be created while
+-# creating the account
+-# CREATE_MAIL_SPOOL=yes
+-
++INACTIVE = 90
++PASS_MIN_LEN=16
+
+changed: [docker-1]
+--- before: /etc/default/useradd
++++ after: /home/valeriy/DevSecOps/OS/devops/ansible/lab5/roles/hardening/files/useradd
+@@ -1,37 +1,3 @@
+-# Default values for useradd(8)
+-#
+-# The SHELL variable specifies the default login shell on your
+-# system.
+-# Similar to DHSELL in adduser. However, we use "sh" here because
+-# useradd is a low level utility and should be as general
+-# as possible
+ SHELL=/bin/sh
+-#
+-# The default group for users
+-# 100=users on Debian systems
+-# Same as USERS_GID in adduser
+-# This argument is used when the -n flag is specified.
+-# The default behavior (when -n and -g are not specified) is to create a
+-# primary user group with the same name as the user being added to the
+-# system.
+-# GROUP=100
+-#
+-# The default home directory. Same as DHOME for adduser
+-# HOME=/home
+-#
+-# The number of days after a password expires until the account 
+-# is permanently disabled
+-# INACTIVE=-1
+-#
+-# The default expire date
+-# EXPIRE=
+-#
+-# The SKEL variable specifies the directory containing "skeletal" user
+-# files; in other words, files such as a sample .profile that will be
+-# copied to the new user's home directory when it is created.
+-# SKEL=/etc/skel
+-#
+-# Defines whether the mail spool should be created while
+-# creating the account
+-# CREATE_MAIL_SPOOL=yes
+-
++INACTIVE = 90
++PASS_MIN_LEN=16
+
+changed: [docker-3]
+--- before: /etc/default/useradd
++++ after: /home/valeriy/DevSecOps/OS/devops/ansible/lab5/roles/hardening/files/useradd
+@@ -1,37 +1,3 @@
+-# Default values for useradd(8)
+-#
+-# The SHELL variable specifies the default login shell on your
+-# system.
+-# Similar to DHSELL in adduser. However, we use "sh" here because
+-# useradd is a low level utility and should be as general
+-# as possible
+ SHELL=/bin/sh
+-#
+-# The default group for users
+-# 100=users on Debian systems
+-# Same as USERS_GID in adduser
+-# This argument is used when the -n flag is specified.
+-# The default behavior (when -n and -g are not specified) is to create a
+-# primary user group with the same name as the user being added to the
+-# system.
+-# GROUP=100
+-#
+-# The default home directory. Same as DHOME for adduser
+-# HOME=/home
+-#
+-# The number of days after a password expires until the account 
+-# is permanently disabled
+-# INACTIVE=-1
+-#
+-# The default expire date
+-# EXPIRE=
+-#
+-# The SKEL variable specifies the directory containing "skeletal" user
+-# files; in other words, files such as a sample .profile that will be
+-# copied to the new user's home directory when it is created.
+-# SKEL=/etc/skel
+-#
+-# Defines whether the mail spool should be created while
+-# creating the account
+-# CREATE_MAIL_SPOOL=yes
+-
++INACTIVE = 90
++PASS_MIN_LEN=16
+
+changed: [docker-2]
+
+TASK [hardening : Change a login.defs] *****************************************
+ok: [docker-2] => (item={'regexp': '^ENCRYPT_METHOD ', 'line': 'ENCRYPT_METHOD SHA512'})
+ok: [docker-3] => (item={'regexp': '^ENCRYPT_METHOD ', 'line': 'ENCRYPT_METHOD SHA512'})
+ok: [docker-1] => (item={'regexp': '^ENCRYPT_METHOD ', 'line': 'ENCRYPT_METHOD SHA512'})
+--- before: /etc/login.defs (content)
++++ after: /etc/login.defs (content)
+@@ -1,3 +1,4 @@
++FAIL_DELAY 3
+ #
+ # /etc/login.defs - Configuration control definitions for the login package.
+ #
+
+changed: [docker-2] => (item={'regexp': '^#FAIL_DELAY ', 'line': 'FAIL_DELAY 3'})
+--- before: /etc/login.defs (content)
++++ after: /etc/login.defs (content)
+@@ -1,3 +1,4 @@
++FAIL_DELAY 3
+ #
+ # /etc/login.defs - Configuration control definitions for the login package.
+ #
+
+changed: [docker-3] => (item={'regexp': '^#FAIL_DELAY ', 'line': 'FAIL_DELAY 3'})
+--- before: /etc/login.defs (content)
++++ after: /etc/login.defs (content)
+@@ -1,3 +1,4 @@
++FAIL_DELAY 3
+ #
+ # /etc/login.defs - Configuration control definitions for the login package.
+ #
+
+changed: [docker-1] => (item={'regexp': '^#FAIL_DELAY ', 'line': 'FAIL_DELAY 3'})
+ok: [docker-2] => (item={'regexp': '^FAILLOG_ENAB\t\tyes ', 'line': 'FAILLOG_ENAB\t\tyes'})
+ok: [docker-3] => (item={'regexp': '^FAILLOG_ENAB\t\tyes ', 'line': 'FAILLOG_ENAB\t\tyes'})
+ok: [docker-1] => (item={'regexp': '^FAILLOG_ENAB\t\tyes ', 'line': 'FAILLOG_ENAB\t\tyes'})
+
+PLAY RECAP *********************************************************************
+docker-1                   : ok=13   changed=9    unreachable=0    failed=0    skipped=2    rescued=0    ignored=0   
+docker-2                   : ok=13   changed=9    unreachable=0    failed=0    skipped=2    rescued=0    ignored=0   
+docker-3                   : ok=13   changed=9    unreachable=0    failed=0    skipped=2    rescued=0    ignored=0   
+
+
+==> docker-1: Machine 'docker-1' has a post `vagrant up` message. This is a message
+==> docker-1: from the creator of the Vagrantfile, and not from Vagrant itself:
+==> docker-1: 
+==> docker-1: Vanilla Debian box. See https://app.vagrantup.com/debian for help and bug reports
+
+==> docker-2: Machine 'docker-2' has a post `vagrant up` message. This is a message
+==> docker-2: from the creator of the Vagrantfile, and not from Vagrant itself:
+==> docker-2: 
+==> docker-2: Vanilla Debian box. See https://app.vagrantup.com/debian for help and bug reports
+
+==> docker-3: Machine 'docker-3' has a post `vagrant up` message. This is a message
+==> docker-3: from the creator of the Vagrantfile, and not from Vagrant itself:
+==> docker-3: 
+==> docker-3: Vanilla Debian box. See https://app.vagrantup.com/debian for help and bug reports

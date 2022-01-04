@@ -1,0 +1,3 @@
+SHELL=/bin/sh
+INACTIVE = 90
+PASS_MIN_LEN=16
