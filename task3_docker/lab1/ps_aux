@@ -1,0 +1,8 @@
+root@dfd46b059a19:/# ps aux -P | grep nginx
+root           1  0.0  0.1  58348 11768 ?        Ss   08:56   0:00 nginx: master process nginx -g daemon off;
+valeriy        8  0.0  0.0  58720  3360 ?        S    08:56   0:00 nginx: worker process
+valeriy        9  0.0  0.0  58720  3360 ?        S    08:56   0:00 nginx: worker process
+
+valeriy       10  0.0  0.0  58720  3360 ?        S    08:56   0:00 nginx: worker process
+valeriy       11  0.0  0.0  58720  3360 ?        S    08:56   0:00 nginx: worker process
+root          30  0.0  0.0   3180   724 pts/0    S+   08:57   0:00 grep nginx
