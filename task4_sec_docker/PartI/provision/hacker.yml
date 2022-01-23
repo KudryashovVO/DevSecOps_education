@@ -1,0 +1,13 @@
+---
+- name: Provision hacker
+  hosts: hacker
+  become: true
+  tasks:
+  - name: Install required packages
+    apt:
+      name:
+      - nmap
+      - curl
+      - build-essential
+      - netcat
+      state: present
